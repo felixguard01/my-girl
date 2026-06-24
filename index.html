@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -23,6 +22,53 @@ body{
     overflow:hidden;
 }
 
+/* Hamburger */
+.menu-btn{
+    position:fixed;
+    top:20px;
+    left:20px;
+    font-size:30px;
+    background:white;
+    width:50px;
+    height:50px;
+    border-radius:12px;
+    border:none;
+    cursor:pointer;
+    z-index:1001;
+    box-shadow:0 5px 15px rgba(0,0,0,.1);
+}
+
+.sidebar{
+    position:fixed;
+    top:0;
+    left:-260px;
+    width:250px;
+    height:100%;
+    background:white;
+    box-shadow:5px 0 20px rgba(0,0,0,.1);
+    transition:.3s;
+    padding-top:80px;
+    z-index:1000;
+}
+
+.sidebar.active{
+    left:0;
+}
+
+.sidebar a{
+    display:block;
+    padding:18px 25px;
+    text-decoration:none;
+    color:#555;
+    font-size:18px;
+    transition:.2s;
+}
+
+.sidebar a:hover{
+    background:#ffe6ef;
+    color:#ff4f81;
+}
+
 .container{
     text-align:center;
 }
@@ -37,7 +83,7 @@ p{
     margin-bottom:25px;
 }
 
-button{
+.main-btn{
     border:none;
     padding:15px 35px;
     border-radius:999px;
@@ -48,11 +94,11 @@ button{
     transition:.3s;
 }
 
-button:hover{
+.main-btn:hover{
     transform:scale(1.05);
 }
 
-button:disabled{
+.main-btn:disabled{
     opacity:.7;
     cursor:not-allowed;
 }
@@ -90,21 +136,40 @@ button:disabled{
 
 <body>
 
+<button class="menu-btn" onclick="toggleMenu()">☰</button>
+
+<div class="sidebar" id="sidebar">
+    <a href="index.html">ปุ่มคิดถึงหมา</a>
+    <a href="love.html">Phase 2</a>
+    <a href="wish.html">Phase 3</a>
+</div>
+
 <div class="container">
     <h1>🐶</h1>
     <p>กดปุ่มนี้เมื่อคิดถึงหมา</p>
 
-    <button id="loveBtn" onclick="showMessage()">
-        💌 กดเมื่อคิดถึงหมา
+    <button
+        class="main-btn"
+        id="loveBtn"
+        onclick="showMessage()">
+        กดเมื่อคิดถึงหมา
     </button>
 </div>
 
 <script>
+
 const messages = [
     "หมาจะอยู่กับเจ้าของตลอดไปนะ",
     "หมาคิดถึงเจ้าของเหมือนกัน",
     "หมาอยากกอดเจ้าของจัง",
 ];
+
+function toggleMenu(){
+    document
+        .getElementById("sidebar")
+        .classList
+        .toggle("active");
+}
 
 function showMessage(){
 
@@ -138,4 +203,3 @@ function showMessage(){
 
 </body>
 </html>
-
