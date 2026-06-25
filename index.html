@@ -4,13 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Film</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
+*{ margin:0; padding:0; box-sizing:border-box; }
 
 body{
     height:100vh;
@@ -22,7 +19,6 @@ body{
     overflow:hidden;
 }
 
-/* Hamburger */
 .menu-btn{
     position:fixed;
     top:20px;
@@ -51,9 +47,7 @@ body{
     z-index:1000;
 }
 
-.sidebar.active{
-    left:0;
-}
+.sidebar.active{ left:0; }
 
 .sidebar a{
     display:block;
@@ -64,22 +58,26 @@ body{
     transition:.2s;
 }
 
-.sidebar a:hover{
-    background:#ffe6ef;
+.sidebar a:hover{ background:#ffe6ef; color:#ff4f81; }
+
+.container{ text-align:center; }
+
+h1{ color:#ff4f81; margin-bottom:15px; }
+
+p{ color:#777; margin-bottom:10px; }
+
+/* ✨ ส่วนแสดงจำนวนครั้ง */
+.count-display{
+    font-size:48px;
+    font-weight:bold;
     color:#ff4f81;
+    margin-bottom:5px;
+    line-height:1;
 }
 
-.container{
-    text-align:center;
-}
-
-h1{
-    color:#ff4f81;
-    margin-bottom:15px;
-}
-
-p{
-    color:#777;
+.count-label{
+    font-size:14px;
+    color:#bbb;
     margin-bottom:25px;
 }
 
@@ -94,14 +92,9 @@ p{
     transition:.3s;
 }
 
-.main-btn:hover{
-    transform:scale(1.05);
-}
+.main-btn:hover{ transform:scale(1.05); }
 
-.main-btn:disabled{
-    opacity:.7;
-    cursor:not-allowed;
-}
+.main-btn:disabled{ opacity:.7; cursor:not-allowed; }
 
 .floating-message{
     position:fixed;
@@ -117,19 +110,9 @@ p{
 }
 
 @keyframes floatUp{
-    0%{
-        opacity:0;
-        transform:translate(-50%,30px);
-    }
-
-    20%{
-        opacity:1;
-    }
-
-    100%{
-        opacity:0;
-        transform:translate(-50%,-180px);
-    }
+    0%{ opacity:0; transform:translate(-50%,30px); }
+    20%{ opacity:1; }
+    100%{ opacity:0; transform:translate(-50%,-180px); }
 }
 </style>
 </head>
@@ -148,57 +131,96 @@ p{
     <h1>🐶</h1>
     <p>กดปุ่มนี้เมื่อคิดถึงหมา</p>
 
-    <button
-        class="main-btn"
-        id="loveBtn"
-        onclick="showMessage()">
+    <div class="count-display" id="countDisplay">...</div>
+    <div class="count-label">ครั้งที่คิดถึงหมา</div>
+
+    <button class="main-btn" id="loveBtn" onclick="showMessage()">
         กดเมื่อคิดถึงหมา
     </button>
 </div>
 
 <script>
+// ==============================
+// 🔧 ใส่ค่าของคุณตรงนี้
+const SUPABASE_URL = 'https://amwlkhrpzryfbuujdvto.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtd2xraHJwenJ5ZmJ1dWpkdnRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzNzE5NDAsImV4cCI6MjA5Nzk0Nzk0MH0.d3aPTMkosHossHw3k-8siS3NeAwQQjHR1Lzbxs1TIS8'
+// ==============================
+
+const { createClient } = supabase
+const db = createClient(SUPABASE_URL, SUPABASE_KEY)
 
 const messages = [
     "หมาจะอยู่กับเจ้าของตลอดไปนะ",
     "หมาคิดถึงเจ้าของเหมือนกัน",
     "หมาอยากกอดเจ้าของจัง",
-];
+    "หมารักเจ้าของ"
+]
+
+// โหลดจำนวนตอนเปิดหน้า
+async function loadCount(){
+    const { data, error } = await db
+        .from('press_count')
+        .select('count')
+        .eq('id', 1)
+        .single()
+
+    if (!error && data) {
+        document.getElementById('countDisplay').textContent = data.count.toLocaleString()
+    }
+}
+
+// Real-time subscribe — ทุกคนเห็นพร้อมกัน
+db.channel('press_count_changes')
+    .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'press_count'
+    }, payload => {
+        document.getElementById('countDisplay').textContent =
+            payload.new.count.toLocaleString()
+    })
+    .subscribe()
 
 function toggleMenu(){
-    document
-        .getElementById("sidebar")
-        .classList
-        .toggle("active");
+    document.getElementById("sidebar").classList.toggle("active")
 }
 
-function showMessage(){
+async function showMessage(){
+    const button = document.getElementById("loveBtn")
+    button.disabled = true
+    button.textContent = "เฟกำลังส่งข้อความ..."
 
-    const button = document.getElementById("loveBtn");
+    // เพิ่ม count ใน Supabase
+    const { data: current } = await db
+        .from('press_count')
+        .select('count')
+        .eq('id', 1)
+        .single()
 
-    button.disabled = true;
-    button.textContent = "เฟกำลังส่งข้อความ...";
+    if (current) {
+        await db
+            .from('press_count')
+            .update({ count: current.count + 1 })
+            .eq('id', 1)
+    }
 
-    const randomMessage =
-        messages[Math.floor(Math.random() * messages.length)];
+    const randomMessage = messages[Math.floor(Math.random() * messages.length)]
 
     setTimeout(() => {
+        const msg = document.createElement("div")
+        msg.className = "floating-message"
+        msg.textContent = randomMessage
+        document.body.appendChild(msg)
 
-        const msg = document.createElement("div");
+        button.disabled = false
+        button.textContent = "กดเมื่อคิดถึงหมา"
 
-        msg.className = "floating-message";
-        msg.textContent = randomMessage;
-
-        document.body.appendChild(msg);
-
-        button.disabled = false;
-        button.textContent = "กดเมื่อคิดถึงหมา";
-
-        setTimeout(() => {
-            msg.remove();
-        }, 3000);
-
-    }, 1500);
+        setTimeout(() => msg.remove(), 3000)
+    }, 1500)
 }
+
+// โหลดค่าเริ่มต้น
+loadCount()
 </script>
 
 </body>

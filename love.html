@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>หน้าใหม่</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    min-height:100vh;
+    background:linear-gradient(135deg,#ffd6e7,#fff5f8);
+    font-family:'Sarabun',sans-serif;
+}
+
+/* Hamburger */
+.menu-btn{
+    position:fixed;
+    top:20px;
+    left:20px;
+    font-size:30px;
+    background:white;
+    width:50px;
+    height:50px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    z-index:1001;
+    box-shadow:0 5px 15px rgba(0,0,0,.1);
+}
+
+.sidebar{
+    position:fixed;
+    top:0;
+    left:-260px;
+    width:250px;
+    height:100%;
+    background:white;
+    box-shadow:5px 0 20px rgba(0,0,0,.1);
+    transition:.3s;
+    padding-top:80px;
+    z-index:1000;
+}
+
+.sidebar.active{
+    left:0;
+}
+
+.sidebar a{
+    display:block;
+    padding:18px 25px;
+    text-decoration:none;
+    color:#555;
+    font-size:18px;
+}
+
+.sidebar a:hover{
+    background:#ffe6ef;
+    color:#ff4f81;
+}
+</style>
+</head>
+
+<body>
+
+<button class="menu-btn" onclick="toggleMenu()">☰</button>
+
+<div class="sidebar" id="sidebar">
+   <a href="index.html">ปุ่มคิดถึงหมา</a>
+    <a href="love.html">Phase 2</a>
+    <a href="wish.html">Phase 3</a>
+</div>
+
+<script>
+function toggleMenu(){
+    document
+        .getElementById("sidebar")
+        .classList
+        .toggle("active");
+}
+</script>
+
+</body>
+</html>
