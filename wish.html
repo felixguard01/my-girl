@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>วันที่เจ้าของคบกับหมา</title>
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+body{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,#ffd6e7,#fff5f8);
+    font-family:'Sarabun',sans-serif;
+    padding:80px 24px 40px;
+    gap:32px;
+}
+
+.menu-btn{
+    position:fixed;
+    top:20px;
+    left:20px;
+    font-size:30px;
+    background:white;
+    width:50px;
+    height:50px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    z-index:1001;
+    box-shadow:0 5px 15px rgba(0,0,0,.1);
+}
+
+.sidebar{
+    position:fixed;
+    top:0;
+    left:-260px;
+    width:250px;
+    height:100%;
+    background:white;
+    box-shadow:5px 0 20px rgba(0,0,0,.1);
+    transition:.3s;
+    padding-top:80px;
+    z-index:1000;
+}
+
+.sidebar.active{ left:0; }
+.sidebar a{
+    display:block;
+    padding:18px 25px;
+    text-decoration:none;
+    color:#555;
+    font-size:18px;
+}
+.sidebar a:hover{ background:#ffe6ef; color:#ff4f81; }
+
+/* Timer */
+.top{ text-align:center; }
+
+.emoji{
+    font-size:48px;
+    display:block;
+    margin-bottom:12px;
+}
+
+.days-num{
+    font-size:72px;
+    font-weight:bold;
+    color:#ff4f81;
+    line-height:1;
+}
+
+.days-label{
+    font-size:15px;
+    color:#ccc;
+    margin-top:4px;
+    margin-bottom:20px;
+}
+
+.hms{
+    font-size:28px;
+    color:#ffaac8;
+    letter-spacing:2px;
+}
+
+.since{
+    font-size:13px;
+    color:#ddd;
+    margin-top:8px;
+}
+
+/* Banner */
+.banner{
+    background:white;
+    border-radius:16px;
+    padding:18px 24px;
+    text-align:center;
+    box-shadow:0 4px 20px rgba(255,75,129,.12);
+    display:none;
+    width:100%;
+    max-width:320px;
+    animation:fadeIn .4s ease;
+}
+
+.banner-title{
+    font-size:17px;
+    font-weight:bold;
+    color:#ff4f81;
+    margin-bottom:4px;
+}
+
+.banner-sub{
+    font-size:13px;
+    color:#ccc;
+}
+
+/* Stats */
+.stats{
+    display:flex;
+    gap:12px;
+    width:100%;
+    max-width:320px;
+}
+
+.stat{
+    flex:1;
+    background:white;
+    border-radius:16px;
+    padding:16px 10px;
+    text-align:center;
+    box-shadow:0 4px 16px rgba(255,75,129,.07);
+}
+
+.stat-num{
+    font-size:26px;
+    font-weight:bold;
+    color:#ff4f81;
+}
+
+.stat-label{
+    font-size:11px;
+    color:#ccc;
+    margin-top:4px;
+}
+
+/* History */
+.history{
+    width:100%;
+    max-width:320px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.h-item{
+    background:white;
+    border-radius:14px;
+    padding:12px 16px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    box-shadow:0 2px 10px rgba(255,75,129,.06);
+}
+
+.h-item.past{ opacity:.4; }
+
+.h-left{ font-size:15px; color:#555; }
+.h-date{ font-size:12px; color:#ccc; margin-top:2px; }
+
+.h-tag{
+    font-size:11px;
+    padding:3px 10px;
+    border-radius:999px;
+    background:#ffe6ef;
+    color:#ff4f81;
+}
+
+.h-item.past .h-tag{
+    background:#f5f5f5;
+    color:#ccc;
+}
+
+@keyframes fadeIn{
+    from{ opacity:0; transform:translateY(6px); }
+    to{ opacity:1; transform:translateY(0); }
+}
+</style>
+</head>
+
+<body>
+
+<button class="menu-btn" onclick="toggleMenu()">☰</button>
+
+<div class="sidebar" id="sidebar">
+       <a href="index.html">ปุ่มคิดถึงหมา</a>
+    <a href="love.html">รางวัลเจ้าของ</a>
+    <a href="wish.html">วันคบเจ้าของกับหมา</a>
+</div>
+
+<!-- Timer -->
+<div class="top">
+    <div class="days-num" id="days">0</div>
+    <div class="days-label">วันคบเจ้าของกับหมา</div>
+    <div class="hms" id="hms">00:00:00</div>
+    <div class="since">ตั้งแต่ x</div>
+</div>
+
+<!-- Banner ครบรอบ -->
+<div class="banner" id="banner">
+    <div class="banner-title" id="bannerTitle"></div>
+    <div class="banner-sub" id="bannerSub"></div>
+</div>
+
+<!-- Stats -->
+<div class="stats">
+
+    <div class="stat">
+        <div class="stat-num" id="statNext">-</div>
+        <div class="stat-label">Anniversary</div>
+    </div>
+
+    <div class="stat">
+        <div class="stat-num" id="statMonths">0</div>
+        <div class="stat-label">Months</div>
+    </div>
+
+    <div class="stat">
+        <div class="stat-num" id="statYears">0</div>
+        <div class="stat-label">Years</div>
+    </div>
+</div>
+
+<!-- History -->
+<div class="history" id="history"></div>
+
+<script>
+function toggleMenu(){
+    document.getElementById("sidebar").classList.toggle("active")
+}
+
+// 🔧 แก้ปีตรงนี้
+const START = new Date('2026-08-01T00:00:00')
+
+function pad(n){ return String(n).padStart(2,'0') }
+
+function update(){
+    const now  = new Date()
+    const diff = now - START
+
+    const days    = Math.floor(diff / 864e5)
+    const hours   = Math.floor((diff % 864e5) / 36e5)
+    const minutes = Math.floor((diff % 36e5) / 6e4)
+    const seconds = Math.floor((diff % 6e4) / 1e3)
+
+    document.getElementById('days').textContent = days.toLocaleString()
+    document.getElementById('hms').textContent  = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
+
+    const totalMonths = (now.getFullYear() - START.getFullYear()) * 12
+        + (now.getMonth() - START.getMonth())
+    const years = Math.floor(totalMonths / 12)
+
+    document.getElementById('statMonths').textContent = totalMonths
+    document.getElementById('statYears').textContent  = years
+
+    const next = new Date(START)
+    next.setMonth(next.getMonth() + totalMonths + 1)
+    const daysToNext = Math.ceil((next - now) / 864e5)
+    document.getElementById('statNext').textContent = daysToNext
+
+    // banner ครบรอบ
+    if(now.getDate() === START.getDate() && totalMonths > 0){
+        const b = document.getElementById('banner')
+        b.style.display = 'block'
+        document.getElementById('bannerTitle').textContent =
+            totalMonths % 12 === 0
+                ? `ครบรอบ ${totalMonths/12} ปีแล้วนะ!`
+                : `ครบรอบ ${totalMonths} เดือนแล้วนะ!`
+        document.getElementById('bannerSub').textContent =
+            `${days.toLocaleString()} วันที่มีกัน`
+    }
+}
+
+function buildHistory(){
+    const now   = new Date()
+    const wrap  = document.getElementById('history')
+    const items = []
+    let d = new Date(START)
+
+    while(true){
+        d = new Date(d)
+        d.setMonth(d.getMonth() + 1)
+        if(d > new Date(now.getTime() + 864e5 * 120)) break
+
+        const m      = Math.round((d - START) / (864e5 * 30.44))
+        const isYear = m % 12 === 0
+        const isPast = d <= now
+
+        items.push({ date: new Date(d), m, isYear, isPast })
+    }
+
+    const past   = items.filter(i => i.isPast).slice(-3)
+    const future = items.filter(i => !i.isPast).slice(0, 3)
+
+    ;[...past, ...future].forEach(item => {
+        const dateStr = item.date.toLocaleDateString('en-GB', {
+            day:'numeric', month:'short', year:'numeric'
+        })
+        const title = item.isYear ? `ครบรอบ ${item.m/12} ปี ` : `ครบรอบ ${item.m} เดือน`
+
+        wrap.innerHTML += `
+        <div class="h-item ${item.isPast ? 'past' : ''}">
+            <div>
+                <div class="h-left">${title}</div>
+                <div class="h-date">${dateStr}</div>
+            </div>
+            <div class="h-tag">${item.isPast ? 'ผ่านมาแล้ว' : 'กำลังมาถึง'}</div>
+        </div>`
+    })
+}
+
+update()
+setInterval(update, 1000)
+buildHistory()
+</script>
+
+</body>
+</html>
